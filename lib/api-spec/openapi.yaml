@@ -1,0 +1,252 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: trades
+    description: Manual trade journal operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /trades:
+    get:
+      operationId: listTrades
+      tags: [trades]
+      summary: List journal trades
+      description: Returns manually recorded trades, newest first.
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: side
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [buy, sell]
+      responses:
+        "200":
+          description: Journal trades
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Trade"
+    post:
+      operationId: createTrade
+      tags: [trades]
+      summary: Record a trade
+      description: Adds a manual journal entry. This never places or modifies a broker order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TradeInput"
+      responses:
+        "201":
+          description: Created trade
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trade"
+        "400":
+          description: Invalid trade data
+  /trades/summary:
+    get:
+      operationId: getTradeSummary
+      tags: [trades]
+      summary: Get journal summary
+      description: Returns aggregate counts and P&L for the current journal.
+      responses:
+        "200":
+          description: Journal summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradeSummary"
+  /trades/{id}:
+    patch:
+      operationId: updateTrade
+      tags: [trades]
+      summary: Update a journal trade
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TradeInput"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated trade
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trade"
+        "400":
+          description: Invalid trade data
+        "404":
+          description: Trade not found
+    delete:
+      operationId: deleteTrade
+      tags: [trades]
+      summary: Delete a journal trade
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Trade deleted
+        "404":
+          description: Trade not found
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    Trade:
+      type: object
+      properties:
+        id:
+          type: integer
+        symbol:
+          type: string
+          minLength: 1
+        asset:
+          type: string
+          minLength: 1
+        side:
+          type: string
+          enum: [buy, sell]
+        lotSize:
+          type: number
+          exclusiveMinimum: 0
+        entryAt:
+          type: string
+          format: date-time
+        strategy:
+          type: string
+          minLength: 1
+        regime:
+          type: string
+          minLength: 1
+        pnl:
+          type: number
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - symbol
+        - asset
+        - side
+        - lotSize
+        - entryAt
+        - strategy
+        - regime
+        - pnl
+        - notes
+        - createdAt
+        - updatedAt
+    TradeInput:
+      type: object
+      properties:
+        symbol:
+          type: string
+          minLength: 1
+        asset:
+          type: string
+          minLength: 1
+        side:
+          type: string
+          enum: [buy, sell]
+        lotSize:
+          type: number
+          exclusiveMinimum: 0
+        entryAt:
+          type: string
+          format: date-time
+        strategy:
+          type: string
+          minLength: 1
+        regime:
+          type: string
+          minLength: 1
+        pnl:
+          type: number
+        notes:
+          type: ["string", "null"]
+      required:
+        - symbol
+        - asset
+        - side
+        - lotSize
+        - entryAt
+        - strategy
+        - regime
+        - pnl
+    TradeSummary:
+      type: object
+      properties:
+        totalTrades:
+          type: integer
+        buys:
+          type: integer
+        sells:
+          type: integer
+        totalPnl:
+          type: number
+        symbolsTraded:
+          type: integer
+        winningTrades:
+          type: integer
+        losingTrades:
+          type: integer
+      required:
+        - totalTrades
+        - buys
+        - sells
+        - totalPnl
+        - symbolsTraded
+        - winningTrades
+        - losingTrades
+
