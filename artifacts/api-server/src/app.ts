@@ -26,6 +26,7 @@ app.use(
   }),
 );
 app.use(cors());
+app.use("/api/journal-notes", express.json({ limit: "35mb" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

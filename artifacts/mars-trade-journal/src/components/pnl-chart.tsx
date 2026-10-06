@@ -50,7 +50,7 @@ export function PnlChart({ trades }: PnlChartProps) {
           <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">Your P&L curve will appear after the first journal entry is recorded.</p>
         </div>
       ) : (
-        <div className="mt-5 h-[220px] w-full" data-testid="chart-pnl-curve">
+        <div className="relative mt-5 h-[220px] w-full overflow-hidden" data-testid="chart-pnl-curve">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
               <defs>

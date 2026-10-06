@@ -7,8 +7,12 @@
  */
 
 export * from './healthStatus';
+export * from './journalNote';
+export * from './journalNoteInput';
+export * from './journalNoteInputLinkMode';
 export * from './listTradesParams';
 export * from './listTradesSide';
+export * from './noteAttachment';
 export * from './trade';
 export * from './tradeInput';
 export * from './tradeInputSide';
