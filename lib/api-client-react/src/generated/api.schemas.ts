@@ -74,6 +74,64 @@ export interface TradeSummary {
   losingTrades: number;
 }
 
+export interface NoteAttachment {
+  id: string;
+  /**
+     * @minLength 1
+     * @maxLength 255
+     */
+  name: string;
+  /** @maxLength 2000 */
+  caption: string;
+  /**
+     * Base64 PNG, JPEG, WebP or GIF, at most 5 MiB decoded
+     * @maxLength 6990600
+     */
+  dataUrl: string;
+}
+
+export type JournalNoteInputLinkMode = typeof JournalNoteInputLinkMode[keyof typeof JournalNoteInputLinkMode];
+
+
+export const JournalNoteInputLinkMode = {
+  date: 'date',
+  selected: 'selected',
+} as const;
+
+export interface JournalNoteInput {
+  /**
+     * Calendar date in the saved timezone
+     * @pattern ^\d{4}-\d{2}-\d{2}$
+     */
+  date: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  timeZone: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  title: string;
+  /** @maxLength 100000 */
+  body: string;
+  linkMode: JournalNoteInputLinkMode;
+  /**
+     * @maxItems 1000
+     * @items.minimum 1
+     */
+  selectedTradeIds: number[];
+  /** @maxItems 5 */
+  attachments: NoteAttachment[];
+}
+
+export type JournalNote = JournalNoteInput & {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type ListTradesParams = {
 search?: string;
 side?: ListTradesSide;

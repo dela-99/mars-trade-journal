@@ -175,3 +175,223 @@ export const DeleteTradeParams = zod.object({
 export const DeleteTradeResponse = zod.void()
 
 
+/**
+ * @summary List dated notes and their screenshots
+ */
+export const listJournalNotesResponseOneDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+export const listJournalNotesResponseOneTimeZoneMax = 100;
+
+export const listJournalNotesResponseOneTitleMax = 200;
+
+export const listJournalNotesResponseOneBodyMax = 100000;
+
+
+export const listJournalNotesResponseOneSelectedTradeIdsMax = 1000;
+
+export const listJournalNotesResponseOneAttachmentsItemNameMax = 255;
+
+export const listJournalNotesResponseOneAttachmentsItemCaptionMax = 2000;
+
+export const listJournalNotesResponseOneAttachmentsItemDataUrlMax = 6990600;
+
+export const listJournalNotesResponseOneAttachmentsMax = 5;
+
+
+
+export const ListJournalNotesResponseItem = zod.object({
+  "date": zod.string().regex(listJournalNotesResponseOneDateRegExp).describe('Calendar date in the saved timezone'),
+  "timeZone": zod.string().min(1).max(listJournalNotesResponseOneTimeZoneMax),
+  "title": zod.string().min(1).max(listJournalNotesResponseOneTitleMax),
+  "body": zod.string().max(listJournalNotesResponseOneBodyMax),
+  "linkMode": zod.enum(['date', 'selected']),
+  "selectedTradeIds": zod.array(zod.number().int().min(1)).max(listJournalNotesResponseOneSelectedTradeIdsMax),
+  "attachments": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "name": zod.string().min(1).max(listJournalNotesResponseOneAttachmentsItemNameMax),
+  "caption": zod.string().max(listJournalNotesResponseOneAttachmentsItemCaptionMax),
+  "dataUrl": zod.string().max(listJournalNotesResponseOneAttachmentsItemDataUrlMax).describe('Base64 PNG, JPEG, WebP or GIF, at most 5 MiB decoded')
+})).max(listJournalNotesResponseOneAttachmentsMax)
+}).and(zod.object({
+  "id": zod.number().int(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}))
+export const ListJournalNotesResponse = zod.array(ListJournalNotesResponseItem)
+
+
+/**
+ * @summary Save a dated journal note
+ */
+export const createJournalNoteBodyDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+export const createJournalNoteBodyTimeZoneMax = 100;
+
+export const createJournalNoteBodyTitleMax = 200;
+
+export const createJournalNoteBodyBodyMax = 100000;
+
+
+export const createJournalNoteBodySelectedTradeIdsMax = 1000;
+
+export const createJournalNoteBodyAttachmentsItemNameMax = 255;
+
+export const createJournalNoteBodyAttachmentsItemCaptionMax = 2000;
+
+export const createJournalNoteBodyAttachmentsItemDataUrlMax = 6990600;
+
+export const createJournalNoteBodyAttachmentsMax = 5;
+
+
+
+export const CreateJournalNoteBody = zod.object({
+  "date": zod.string().regex(createJournalNoteBodyDateRegExp).describe('Calendar date in the saved timezone'),
+  "timeZone": zod.string().min(1).max(createJournalNoteBodyTimeZoneMax),
+  "title": zod.string().min(1).max(createJournalNoteBodyTitleMax),
+  "body": zod.string().max(createJournalNoteBodyBodyMax),
+  "linkMode": zod.enum(['date', 'selected']),
+  "selectedTradeIds": zod.array(zod.number().int().min(1)).max(createJournalNoteBodySelectedTradeIdsMax),
+  "attachments": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "name": zod.string().min(1).max(createJournalNoteBodyAttachmentsItemNameMax),
+  "caption": zod.string().max(createJournalNoteBodyAttachmentsItemCaptionMax),
+  "dataUrl": zod.string().max(createJournalNoteBodyAttachmentsItemDataUrlMax).describe('Base64 PNG, JPEG, WebP or GIF, at most 5 MiB decoded')
+})).max(createJournalNoteBodyAttachmentsMax)
+})
+
+export const createJournalNoteResponseOneDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+export const createJournalNoteResponseOneTimeZoneMax = 100;
+
+export const createJournalNoteResponseOneTitleMax = 200;
+
+export const createJournalNoteResponseOneBodyMax = 100000;
+
+
+export const createJournalNoteResponseOneSelectedTradeIdsMax = 1000;
+
+export const createJournalNoteResponseOneAttachmentsItemNameMax = 255;
+
+export const createJournalNoteResponseOneAttachmentsItemCaptionMax = 2000;
+
+export const createJournalNoteResponseOneAttachmentsItemDataUrlMax = 6990600;
+
+export const createJournalNoteResponseOneAttachmentsMax = 5;
+
+
+
+export const CreateJournalNoteResponse = zod.object({
+  "date": zod.string().regex(createJournalNoteResponseOneDateRegExp).describe('Calendar date in the saved timezone'),
+  "timeZone": zod.string().min(1).max(createJournalNoteResponseOneTimeZoneMax),
+  "title": zod.string().min(1).max(createJournalNoteResponseOneTitleMax),
+  "body": zod.string().max(createJournalNoteResponseOneBodyMax),
+  "linkMode": zod.enum(['date', 'selected']),
+  "selectedTradeIds": zod.array(zod.number().int().min(1)).max(createJournalNoteResponseOneSelectedTradeIdsMax),
+  "attachments": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "name": zod.string().min(1).max(createJournalNoteResponseOneAttachmentsItemNameMax),
+  "caption": zod.string().max(createJournalNoteResponseOneAttachmentsItemCaptionMax),
+  "dataUrl": zod.string().max(createJournalNoteResponseOneAttachmentsItemDataUrlMax).describe('Base64 PNG, JPEG, WebP or GIF, at most 5 MiB decoded')
+})).max(createJournalNoteResponseOneAttachmentsMax)
+}).and(zod.object({
+  "id": zod.number().int(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}))
+
+
+/**
+ * @summary Replace a journal note and its screenshots
+ */
+
+
+
+export const UpdateJournalNoteParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const updateJournalNoteBodyDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+export const updateJournalNoteBodyTimeZoneMax = 100;
+
+export const updateJournalNoteBodyTitleMax = 200;
+
+export const updateJournalNoteBodyBodyMax = 100000;
+
+
+export const updateJournalNoteBodySelectedTradeIdsMax = 1000;
+
+export const updateJournalNoteBodyAttachmentsItemNameMax = 255;
+
+export const updateJournalNoteBodyAttachmentsItemCaptionMax = 2000;
+
+export const updateJournalNoteBodyAttachmentsItemDataUrlMax = 6990600;
+
+export const updateJournalNoteBodyAttachmentsMax = 5;
+
+
+
+export const UpdateJournalNoteBody = zod.object({
+  "date": zod.string().regex(updateJournalNoteBodyDateRegExp).describe('Calendar date in the saved timezone'),
+  "timeZone": zod.string().min(1).max(updateJournalNoteBodyTimeZoneMax),
+  "title": zod.string().min(1).max(updateJournalNoteBodyTitleMax),
+  "body": zod.string().max(updateJournalNoteBodyBodyMax),
+  "linkMode": zod.enum(['date', 'selected']),
+  "selectedTradeIds": zod.array(zod.number().int().min(1)).max(updateJournalNoteBodySelectedTradeIdsMax),
+  "attachments": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "name": zod.string().min(1).max(updateJournalNoteBodyAttachmentsItemNameMax),
+  "caption": zod.string().max(updateJournalNoteBodyAttachmentsItemCaptionMax),
+  "dataUrl": zod.string().max(updateJournalNoteBodyAttachmentsItemDataUrlMax).describe('Base64 PNG, JPEG, WebP or GIF, at most 5 MiB decoded')
+})).max(updateJournalNoteBodyAttachmentsMax)
+})
+
+export const updateJournalNoteResponseOneDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+export const updateJournalNoteResponseOneTimeZoneMax = 100;
+
+export const updateJournalNoteResponseOneTitleMax = 200;
+
+export const updateJournalNoteResponseOneBodyMax = 100000;
+
+
+export const updateJournalNoteResponseOneSelectedTradeIdsMax = 1000;
+
+export const updateJournalNoteResponseOneAttachmentsItemNameMax = 255;
+
+export const updateJournalNoteResponseOneAttachmentsItemCaptionMax = 2000;
+
+export const updateJournalNoteResponseOneAttachmentsItemDataUrlMax = 6990600;
+
+export const updateJournalNoteResponseOneAttachmentsMax = 5;
+
+
+
+export const UpdateJournalNoteResponse = zod.object({
+  "date": zod.string().regex(updateJournalNoteResponseOneDateRegExp).describe('Calendar date in the saved timezone'),
+  "timeZone": zod.string().min(1).max(updateJournalNoteResponseOneTimeZoneMax),
+  "title": zod.string().min(1).max(updateJournalNoteResponseOneTitleMax),
+  "body": zod.string().max(updateJournalNoteResponseOneBodyMax),
+  "linkMode": zod.enum(['date', 'selected']),
+  "selectedTradeIds": zod.array(zod.number().int().min(1)).max(updateJournalNoteResponseOneSelectedTradeIdsMax),
+  "attachments": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "name": zod.string().min(1).max(updateJournalNoteResponseOneAttachmentsItemNameMax),
+  "caption": zod.string().max(updateJournalNoteResponseOneAttachmentsItemCaptionMax),
+  "dataUrl": zod.string().max(updateJournalNoteResponseOneAttachmentsItemDataUrlMax).describe('Base64 PNG, JPEG, WebP or GIF, at most 5 MiB decoded')
+})).max(updateJournalNoteResponseOneAttachmentsMax)
+}).and(zod.object({
+  "id": zod.number().int(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}))
+
+
+/**
+ * @summary Delete a note and its screenshots without deleting trades
+ */
+
+
+
+export const DeleteJournalNoteParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const DeleteJournalNoteResponse = zod.void()
+
+

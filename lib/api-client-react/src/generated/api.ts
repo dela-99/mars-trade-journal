@@ -21,6 +21,8 @@ import type {
 
 import type {
   HealthStatus,
+  JournalNote,
+  JournalNoteInput,
   ListTradesParams,
   Trade,
   TradeInput,
@@ -545,5 +547,333 @@ export const useDeleteTrade = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getDeleteTradeMutationOptions(options));
+    }
+
+export const getListJournalNotesUrl = () => {
+
+
+
+
+  return `/api/journal-notes`
+}
+
+/**
+ * @summary List dated notes and their screenshots
+ */
+export const listJournalNotes = async ( options?: Parameters<typeof customFetch>[1]): Promise<JournalNote[]> => {
+
+  return customFetch<JournalNote[]>(getListJournalNotesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListJournalNotesQueryKey = () => {
+    return [
+    `/api/journal-notes`
+    ] as const;
+    }
+
+
+export const getListJournalNotesQueryOptions = <TData = Awaited<ReturnType<typeof listJournalNotes>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listJournalNotes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListJournalNotesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listJournalNotes>>> = ({ signal }) => listJournalNotes({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listJournalNotes>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListJournalNotesQueryResult = NonNullable<Awaited<ReturnType<typeof listJournalNotes>>>
+export type ListJournalNotesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List dated notes and their screenshots
+ */
+
+export function useListJournalNotes<TData = Awaited<ReturnType<typeof listJournalNotes>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listJournalNotes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListJournalNotesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateJournalNoteUrl = () => {
+
+
+
+
+  return `/api/journal-notes`
+}
+
+/**
+ * @summary Save a dated journal note
+ */
+export const createJournalNote = async (journalNoteInput: JournalNoteInput, options?: Parameters<typeof customFetch>[1]): Promise<JournalNote> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<JournalNote>(getCreateJournalNoteUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(journalNoteInput)
+  }
+);}
+
+
+
+
+
+export const getCreateJournalNoteMutationKey = () => ['createJournalNote'] as const;
+
+export const getCreateJournalNoteMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createJournalNote>>, TError,CreateJournalNoteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createJournalNote>>, TError,CreateJournalNoteMutationVariables, TContext> => {
+
+const mutationKey = getCreateJournalNoteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createJournalNote>>, CreateJournalNoteMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createJournalNote(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateJournalNoteMutationResult = NonNullable<Awaited<ReturnType<typeof createJournalNote>>>
+    export type CreateJournalNoteMutationBody = BodyType<JournalNoteInput>
+    export type CreateJournalNoteMutationError = ErrorType<void>
+    export type CreateJournalNoteMutationVariables = {data: BodyType<JournalNoteInput>}
+
+    /**
+ * @summary Save a dated journal note
+ */
+export const useCreateJournalNote = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createJournalNote>>, TError,CreateJournalNoteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createJournalNote>>,
+        TError,
+        CreateJournalNoteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateJournalNoteMutationOptions(options));
+    }
+
+export const getUpdateJournalNoteUrl = (id: number,) => {
+
+
+
+
+  return `/api/journal-notes/${id}`
+}
+
+/**
+ * @summary Replace a journal note and its screenshots
+ */
+export const updateJournalNote = async (id: number,
+    journalNoteInput: JournalNoteInput, options?: Parameters<typeof customFetch>[1]): Promise<JournalNote> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<JournalNote>(getUpdateJournalNoteUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(journalNoteInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateJournalNoteMutationKey = () => ['updateJournalNote'] as const;
+
+export const getUpdateJournalNoteMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateJournalNote>>, TError,UpdateJournalNoteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateJournalNote>>, TError,UpdateJournalNoteMutationVariables, TContext> => {
+
+const mutationKey = getUpdateJournalNoteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateJournalNote>>, UpdateJournalNoteMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateJournalNote(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateJournalNoteMutationResult = NonNullable<Awaited<ReturnType<typeof updateJournalNote>>>
+    export type UpdateJournalNoteMutationBody = BodyType<JournalNoteInput>
+    export type UpdateJournalNoteMutationError = ErrorType<void>
+    export type UpdateJournalNoteMutationVariables = {id: number;data: BodyType<JournalNoteInput>}
+
+    /**
+ * @summary Replace a journal note and its screenshots
+ */
+export const useUpdateJournalNote = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateJournalNote>>, TError,UpdateJournalNoteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateJournalNote>>,
+        TError,
+        UpdateJournalNoteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateJournalNoteMutationOptions(options));
+    }
+
+export const getDeleteJournalNoteUrl = (id: number,) => {
+
+
+
+
+  return `/api/journal-notes/${id}`
+}
+
+/**
+ * @summary Delete a note and its screenshots without deleting trades
+ */
+export const deleteJournalNote = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteJournalNoteUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteJournalNoteMutationKey = () => ['deleteJournalNote'] as const;
+
+export const getDeleteJournalNoteMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteJournalNote>>, TError,DeleteJournalNoteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteJournalNote>>, TError,DeleteJournalNoteMutationVariables, TContext> => {
+
+const mutationKey = getDeleteJournalNoteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteJournalNote>>, DeleteJournalNoteMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteJournalNote(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteJournalNoteMutationResult = NonNullable<Awaited<ReturnType<typeof deleteJournalNote>>>
+
+    export type DeleteJournalNoteMutationError = ErrorType<void>
+    export type DeleteJournalNoteMutationVariables = {id: number}
+
+    /**
+ * @summary Delete a note and its screenshots without deleting trades
+ */
+export const useDeleteJournalNote = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteJournalNote>>, TError,DeleteJournalNoteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteJournalNote>>,
+        TError,
+        DeleteJournalNoteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteJournalNoteMutationOptions(options));
     }
 

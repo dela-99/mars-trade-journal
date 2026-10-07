@@ -1,5 +1,6 @@
 import express, { type Express } from "express";
-import cors from "cors";
+import { toNodeHandler } from "better-auth/node";
+import { auth } from "./lib/auth";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
@@ -25,7 +26,13 @@ app.use(
     },
   }),
 );
-app.use(cors());
+app.use("/api", (_req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
+app.all("/api/auth/*splat", toNodeHandler(auth));
+app.use("/api/import", express.json({ limit: "40mb" }));
+app.use("/api/journal-notes", express.json({ limit: "35mb" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

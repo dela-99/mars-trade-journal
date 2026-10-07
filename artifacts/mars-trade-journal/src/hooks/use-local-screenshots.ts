@@ -31,11 +31,12 @@ function openDatabase(): Promise<IDBDatabase> {
   });
 }
 
-async function getScreenshots(tradeId: number): Promise<LocalScreenshot[]> {
+export async function getScreenshots(tradeId?: number): Promise<LocalScreenshot[]> {
   const database = await openDatabase();
   return new Promise((resolve, reject) => {
     const transaction = database.transaction(STORE_NAME, "readonly");
-    const request = transaction.objectStore(STORE_NAME).index("tradeId").getAll(tradeId);
+    const store = transaction.objectStore(STORE_NAME);
+    const request = tradeId === undefined ? store.getAll() : store.index("tradeId").getAll(tradeId);
     request.onsuccess = () => {
       database.close();
       resolve((request.result as LocalScreenshot[]).sort((a, b) => b.createdAt.localeCompare(a.createdAt)));

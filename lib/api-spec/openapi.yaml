@@ -129,6 +129,73 @@ paths:
           description: Trade deleted
         "404":
           description: Trade not found
+  /journal-notes:
+    get:
+      operationId: listJournalNotes
+      summary: List dated notes and their screenshots
+      responses:
+        "200":
+          description: Notes, newest journal date first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/JournalNote"
+    post:
+      operationId: createJournalNote
+      summary: Save a dated journal note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JournalNoteInput"
+      responses:
+        "201":
+          description: Saved note
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JournalNote"
+        "400":
+          description: Invalid note or trade links
+  /journal-notes/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+    put:
+      operationId: updateJournalNote
+      summary: Replace a journal note and its screenshots
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JournalNoteInput"
+      responses:
+        "200":
+          description: Updated note
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JournalNote"
+        "400":
+          description: Invalid note or trade links
+        "404":
+          description: Note not found
+    delete:
+      operationId: deleteJournalNote
+      summary: Delete a note and its screenshots without deleting trades
+      responses:
+        "204":
+          description: Note deleted
+        "404":
+          description: Note not found
 components:
   schemas:
     HealthStatus:
@@ -250,3 +317,69 @@ components:
         - winningTrades
         - losingTrades
 
+    NoteAttachment:
+      type: object
+      required: [id, name, caption, dataUrl]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        caption:
+          type: string
+          maxLength: 2000
+        dataUrl:
+          type: string
+          maxLength: 6990600
+          description: Base64 PNG, JPEG, WebP or GIF, at most 5 MiB decoded
+    JournalNoteInput:
+      type: object
+      required: [date, timeZone, title, body, linkMode, selectedTradeIds, attachments]
+      properties:
+        date:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          description: Calendar date in the saved timezone
+        timeZone:
+          type: string
+          minLength: 1
+          maxLength: 100
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        body:
+          type: string
+          maxLength: 100000
+        linkMode:
+          type: string
+          enum: [date, selected]
+        selectedTradeIds:
+          type: array
+          maxItems: 1000
+          uniqueItems: true
+          items:
+            type: integer
+            minimum: 1
+        attachments:
+          type: array
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/NoteAttachment"
+    JournalNote:
+      allOf:
+        - $ref: "#/components/schemas/JournalNoteInput"
+        - type: object
+          required: [id, createdAt, updatedAt]
+          properties:
+            id:
+              type: integer
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
