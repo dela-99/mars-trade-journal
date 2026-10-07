@@ -1,3 +1,4 @@
+import { usersTable } from "./auth";
 import {
   date,
   jsonb,
@@ -10,6 +11,9 @@ import {
 
 export const journalNotesTable = pgTable("journal_notes", {
   id: serial("id").primaryKey(),
+  userId: text("user_id").references(() => usersTable.id, {
+    onDelete: "cascade",
+  }),
   date: date("date").notNull(),
   timeZone: varchar("time_zone", { length: 100 }).notNull(),
   title: varchar("title", { length: 200 }).notNull(),

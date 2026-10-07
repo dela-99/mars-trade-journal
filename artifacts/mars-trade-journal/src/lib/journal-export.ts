@@ -1,5 +1,5 @@
 import type { JournalNote, Trade } from "@workspace/api-client-react";
-import { noteLinks, readDataUrl } from "./journal";
+import { journalDays, noteLinks, readDataUrl } from "./journal";
 import type { LocalScreenshot } from "@/hooks/use-local-screenshots";
 
 export async function buildJournalExport(
@@ -77,6 +77,10 @@ export async function buildJournalExport(
   });
   return {
     schemaVersion: "1.0",
+    dateGroups: journalDays(orderedTrades, orderedNotes, "UTC"),
+    groupingTimeZone: "UTC",
+    groupingSemantics:
+      "Date groups use UTC for trade timestamps and the original saved calendar date for notes. Each note retains its own timezone and linked trade IDs, including links across UTC dates.",
     exportedAt: new Date().toISOString(),
     dateSemantics:
       "Trade timestamps are ISO 8601 instants. Note dates are calendar days in each note.timeZone. Date links match trade entry times, never upload times. Selected links keep original IDs; missing and changed dates are flagged.",
@@ -174,6 +178,23 @@ export function journalCsv(data: JournalExport) {
       image_name: a.name,
     })),
   ];
+  // Keep related records beside their original date in the CSV, including backdated imports.
+  const tradeDates = new Map(
+    data.trades.map((t) => [
+      t.id,
+      new Date(t.entryAt).toISOString().slice(0, 10),
+    ]),
+  );
+  const noteDates = new Map(data.notes.map((n) => [n.id, n.date]));
+  const rowDate = (row: Record<string, unknown>) =>
+    row.record_type === "attachment"
+      ? (noteDates.get(Number(row.note_id)) ??
+        tradeDates.get(JSON.parse(String(row.trade_ids))[0]) ??
+        "9999-12-31")
+      : row.record_type === "trade"
+        ? new Date(String(row.date)).toISOString().slice(0, 10)
+        : String(row.date);
+  rows.sort((a, b) => rowDate(a).localeCompare(rowDate(b)));
   return (
     "\uFEFF" +
     [headers, ...rows.map((row) => headers.map((key) => row[key]))]

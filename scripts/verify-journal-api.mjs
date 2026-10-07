@@ -4,12 +4,21 @@ if (!base)
   throw new Error(
     "Set JOURNAL_TEST_API to a disposable local API, e.g. http://localhost:3001/api",
   );
+// Authenticated API checks: provide a disposable account session cookie and public origin.
+if (!process.env.JOURNAL_TEST_COOKIE || !process.env.JOURNAL_TEST_ORIGIN)
+  throw new Error(
+    "Set JOURNAL_TEST_COOKIE and JOURNAL_TEST_ORIGIN for a disposable signed-in account.",
+  );
 const tradeIds = [],
   noteIds = [];
 async function request(path, method = "GET", body, status = 200) {
   const response = await fetch(base + path, {
     method,
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Cookie: process.env.JOURNAL_TEST_COOKIE,
+      Origin: process.env.JOURNAL_TEST_ORIGIN,
+    },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const text = await response.text();
@@ -109,7 +118,19 @@ try {
   );
 } finally {
   for (const id of noteIds)
-    await fetch(`${base}/journal-notes/${id}`, { method: "DELETE" });
+    await fetch(`${base}/journal-notes/${id}`, {
+      method: "DELETE",
+      headers: {
+        Cookie: process.env.JOURNAL_TEST_COOKIE,
+        Origin: process.env.JOURNAL_TEST_ORIGIN,
+      },
+    });
   for (const id of tradeIds)
-    await fetch(`${base}/trades/${id}`, { method: "DELETE" });
+    await fetch(`${base}/trades/${id}`, {
+      method: "DELETE",
+      headers: {
+        Cookie: process.env.JOURNAL_TEST_COOKIE,
+        Origin: process.env.JOURNAL_TEST_ORIGIN,
+      },
+    });
 }

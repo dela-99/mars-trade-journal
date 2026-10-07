@@ -5,8 +5,9 @@ import type { JournalNote, Trade } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { TradeForm } from '@/components/trade-form';
 import { TradeTable } from '@/components/trade-table';
-import { ScreenshotPanel } from '@/components/screenshot-panel';
-import { clearScreenshotsForTrade } from '@/hooks/use-local-screenshots';
+import { JournalDays } from '@/components/journal-days';
+import { AccountBar } from '@/components/account';
+import { JournalImportPanel } from '@/components/journal-import';
 import { JournalNotes, NoteEditor } from '@/components/journal-notes';
 import { JournalExportPanel } from '@/components/journal-export';
 import { PnlChart } from '@/components/pnl-chart';
@@ -23,7 +24,7 @@ function StatCard({ label, value, hint, tone = 'neutral', icon }: { label: strin
 
 export function Dashboard() {
   const queryClient = useQueryClient();
-  const [view, setView] = useState<'trades' | 'notes'>('trades');
+  const [view, setView] = useState<'days' | 'trades' | 'notes'>('days');
   const [noteEditor, setNoteEditor] = useState<{ note?: JournalNote; trade?: Trade } | null>(null);
   const notesQuery = useListJournalNotes();
   const [search, setSearch] = useState('');
@@ -31,7 +32,6 @@ export function Dashboard() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
   const [deletingTrade, setDeletingTrade] = useState<Trade | null>(null);
-  const [screenshotTrade, setScreenshotTrade] = useState<Trade | null>(null);
   const [notice, setNotice] = useState('');
   useEffect(() => {
     if (!notice) return;
@@ -67,7 +67,7 @@ export function Dashboard() {
   const confirmDelete = () => {
     if (!deletingTrade) return;
     deleteTrade.mutate({ id: deletingTrade.id }, {
-      onSuccess: () => { void clearScreenshotsForTrade(deletingTrade.id); setNotice(`${deletingTrade.symbol} was removed from your journal.`); setDeletingTrade(null); refresh(); },
+      onSuccess: () => { setNotice(`${deletingTrade.symbol} was removed from your journal.`); setDeletingTrade(null); refresh(); },
       onError: () => setNotice('Could not remove this entry. Try again.'),
     });
   };
@@ -85,7 +85,7 @@ export function Dashboard() {
           <div><p className="font-display text-[15px] font-extrabold tracking-[.18em]">M.A.R.S.</p><p className="font-mono-custom text-[9px] uppercase tracking-[.18em] text-sidebar-foreground/55">Trade journal</p></div>
         </div>
         <div className="mt-12">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-[.18em] text-sidebar-foreground/40">Workspace</p>
+          <p className="px-3 text-[10px] font-bold uppercase tracking-[.18em] text-sidebar-foreground/40">Workspace</p><button className={`mt-3 flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${view === 'days' ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''}`} onClick={() => setView('days')}><BookOpen size={16} className="text-sidebar-primary" />By date</button>
           <button className={`mt-3 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${view === 'trades' ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''}`} onClick={() => setView('trades')}><BookOpen size={16} className="text-sidebar-primary" />Trade journal</button>
           <button className={`mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${view === 'notes' ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''}`} onClick={() => setView('notes')}><Pencil size={16} className="text-sidebar-primary" />Notes & screenshots</button>
         </div>
@@ -104,8 +104,9 @@ export function Dashboard() {
         </header>
         <div className="paper-grid min-h-[calc(100dvh-73px)]">
           <div className="mx-auto max-w-[1420px] px-4 py-6 sm:px-6 lg:px-8">
+            <AccountBar />
             <div className="animate-rise flex flex-wrap items-end justify-between gap-4">
-              <div><p className="font-mono-custom text-[10px] font-medium uppercase tracking-[.2em] text-primary">Reflect. Refine. Repeat.</p><h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{view === 'trades' ? 'Your trading journal.' : 'Notes & reflections.'}</h1><p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">{view === 'trades' ? 'Every trade, the thinking behind it, and what comes next.' : 'Keep your charts, decisions, and lessons connected to the day you traded.'}</p></div>
+              <div><p className="font-mono-custom text-[10px] font-medium uppercase tracking-[.2em] text-primary">Reflect. Refine. Repeat.</p><h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{view !== 'notes' ? 'Your trading journal.' : 'Notes & reflections.'}</h1><p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">{view !== 'notes' ? 'Every trade, the thinking behind it, and what comes next.' : 'Keep your charts, decisions, and lessons connected to the day you traded.'}</p></div>
               <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground"><Activity size={14} className="text-primary" />{new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date())}</div>
             </div>
             <section className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4 md:gap-4">
@@ -115,10 +116,10 @@ export function Dashboard() {
               <StatCard label="Markets" value={summary ? String(summary.symbolsTraded) : '—'} hint="Distinct symbols in journal" icon={<Target size={17} />} />
             </section>
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
-              <nav className="inline-flex max-w-full gap-1 rounded-xl bg-muted/70 p-1" aria-label="Journal views"><button className="journal-tab" aria-pressed={view === 'trades'} onClick={() => setView('trades')}><BookOpen size={15} />Trade log</button><button className="journal-tab" aria-pressed={view === 'notes'} onClick={() => setView('notes')}><Pencil size={15} />Notes<span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] text-primary">{notesQuery.data?.length ?? '—'}</span></button></nav>
+              <nav className="inline-flex max-w-full flex-wrap gap-1 rounded-xl bg-muted/70 p-1" aria-label="Journal views"><button className="journal-tab" aria-pressed={view === 'days'} onClick={() => setView('days')}>By date</button><button className="journal-tab" aria-pressed={view === 'trades'} onClick={() => setView('trades')}><BookOpen size={15} />Trade log</button><button className="journal-tab" aria-pressed={view === 'notes'} onClick={() => setView('notes')}><Pencil size={15} />Notes<span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] text-primary">{notesQuery.data?.length ?? '—'}</span></button></nav>
               <p className="text-xs text-muted-foreground">Your personal review workspace</p>
             </div>
-            {view === 'notes' ? (notesQuery.isLoading || allTradesQuery.isLoading ? <p className="py-10 text-sm" role="status">Loading notes and trade links…</p> : notesQuery.isError || allTradesQuery.isError ? <div className="py-10" role="alert"><p>Notes and trade links could not be loaded.</p><button className="btn-quiet" onClick={() => { void notesQuery.refetch(); void allTradesQuery.refetch(); }}>Try again</button></div> : <JournalNotes notes={notesQuery.data ?? []} trades={allTrades} onEdit={note => setNoteEditor({ note })} onNew={() => openNote()} onChanged={notesChanged} />) : <>
+            {view === 'days' ? (notesQuery.isLoading || allTradesQuery.isLoading ? <p role="status">Loading your journal…</p> : notesQuery.isError || allTradesQuery.isError ? <p role="alert">Journal dates could not be loaded. Use Refresh to try again.</p> : <JournalDays trades={allTrades} notes={notesQuery.data ?? []} onTrade={openEdit} onNote={note=>setNoteEditor({note})}/>) : view === 'notes' ? (notesQuery.isLoading || allTradesQuery.isLoading ? <p className="py-10 text-sm" role="status">Loading notes and trade links…</p> : notesQuery.isError || allTradesQuery.isError ? <div className="py-10" role="alert"><p>Notes and trade links could not be loaded.</p><button className="btn-quiet" onClick={() => { void notesQuery.refetch(); void allTradesQuery.refetch(); }}>Try again</button></div> : <JournalNotes notes={notesQuery.data ?? []} trades={allTrades} onEdit={note => setNoteEditor({ note })} onNew={() => openNote()} onChanged={notesChanged} />) : <>
              <section className="mt-6 grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_280px]" aria-label="Review overview">
                <PnlChart trades={allTrades} />
               <aside className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
@@ -136,18 +137,18 @@ export function Dashboard() {
                     {hasFilters && <button type="button" className="btn-quiet text-xs" onClick={() => { setSearch(''); setSide('all'); }} data-testid="button-clear-filters"><X size={14} />Clear</button>}
                   </div>
                 </div>
-                {tradeQuery.isLoading ? <div className="space-y-3 p-5" data-testid="status-trades-loading">{[1, 2, 3].map((item) => <div key={item} className="h-14 animate-pulse rounded-lg bg-muted" />)}</div> : tradeQuery.isError ? <div className="flex min-h-56 flex-col items-center justify-center px-5 text-center" data-testid="status-trades-error"><CircleAlert size={24} className="text-destructive" /><p className="mt-3 text-sm font-semibold">Entries could not be loaded.</p><button type="button" className="btn-quiet mt-2 text-xs text-primary" onClick={() => void tradeQuery.refetch()} data-testid="button-retry-trades"><RefreshCw size={13} />Try again</button></div> : trades.length === 0 ? <div className="flex min-h-56 flex-col items-center justify-center px-5 text-center" data-testid="status-trades-empty"><div className="grid h-11 w-11 place-items-center rounded-full bg-primary/10 text-primary"><BookOpen size={20} /></div><p className="mt-3 font-display font-bold">{hasFilters ? 'No entries match that filter.' : 'Your journal is ready.'}</p><p className="mt-1 max-w-xs text-xs leading-relaxed text-muted-foreground">{hasFilters ? 'Try another symbol or reset the side filter.' : 'Record your first manual trade and make the review surface yours.'}</p>{!hasFilters && <button type="button" className="btn-primary mt-4 text-xs" onClick={openNew} data-testid="button-record-first-trade"><Plus size={14} />Record first trade</button>}</div> : <TradeTable trades={trades} onEdit={openEdit} onDelete={setDeletingTrade} onScreenshots={setScreenshotTrade} onNote={openNote} />}
+                {tradeQuery.isLoading ? <div className="space-y-3 p-5" data-testid="status-trades-loading">{[1, 2, 3].map((item) => <div key={item} className="h-14 animate-pulse rounded-lg bg-muted" />)}</div> : tradeQuery.isError ? <div className="flex min-h-56 flex-col items-center justify-center px-5 text-center" data-testid="status-trades-error"><CircleAlert size={24} className="text-destructive" /><p className="mt-3 text-sm font-semibold">Entries could not be loaded.</p><button type="button" className="btn-quiet mt-2 text-xs text-primary" onClick={() => void tradeQuery.refetch()} data-testid="button-retry-trades"><RefreshCw size={13} />Try again</button></div> : trades.length === 0 ? <div className="flex min-h-56 flex-col items-center justify-center px-5 text-center" data-testid="status-trades-empty"><div className="grid h-11 w-11 place-items-center rounded-full bg-primary/10 text-primary"><BookOpen size={20} /></div><p className="mt-3 font-display font-bold">{hasFilters ? 'No entries match that filter.' : 'Your journal is ready.'}</p><p className="mt-1 max-w-xs text-xs leading-relaxed text-muted-foreground">{hasFilters ? 'Try another symbol or reset the side filter.' : 'Record your first manual trade and make the review surface yours.'}</p>{!hasFilters && <button type="button" className="btn-primary mt-4 text-xs" onClick={openNew} data-testid="button-record-first-trade"><Plus size={14} />Record first trade</button>}</div> : <TradeTable trades={trades} onEdit={openEdit} onDelete={setDeletingTrade} onScreenshots={openNote} onNote={openNote} />}
               </div>
 
             </section>
             </>}
+            <JournalImportPanel />
             <JournalExportPanel />
           </div>
         </div>
       </main>
       {noteEditor && <NoteEditor note={noteEditor.note} trade={noteEditor.trade} trades={allTrades} onClose={() => setNoteEditor(null)} onSaved={() => { setNoteEditor(null); notesChanged(); setView('notes'); setNotice('Note and screenshots saved.'); }} />}
       <TradeForm open={formOpen} trade={editingTrade} onClose={() => setFormOpen(false)} onSuccess={onSaved} />
-      <ScreenshotPanel trade={screenshotTrade} open={Boolean(screenshotTrade)} onClose={() => setScreenshotTrade(null)} />
       {notice && <div className="fixed bottom-4 right-4 z-30 flex w-[calc(100%-2rem)] max-w-sm items-start gap-3 rounded-xl border border-primary/20 bg-card px-4 py-3 text-sm shadow-lg animate-rise" role="status" data-testid="status-action-notice"><Check size={17} className="mt-0.5 shrink-0 text-primary" /><span>{notice}</span><button type="button" className="btn-quiet -mr-2 -mt-1 p-1" onClick={() => setNotice('')} aria-label="Dismiss message" data-testid="button-dismiss-notice"><X size={14} /></button></div>}
       {deletingTrade && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="delete-title"><div className="modal-card max-w-sm p-6 animate-rise"><div className="flex items-start justify-between"><div><p className="font-mono-custom text-[10px] uppercase tracking-[.18em] text-destructive">Remove entry</p><h2 id="delete-title" className="mt-2 font-display text-xl font-bold">Delete {deletingTrade.symbol}?</h2></div><button type="button" className="btn-quiet -mr-2 -mt-2" onClick={() => setDeletingTrade(null)} aria-label="Close delete dialog" data-testid="button-close-delete"><X size={17} /></button></div><p className="mt-3 text-sm leading-relaxed text-muted-foreground">This journal entry will be permanently removed. There is no broker action involved.</p><div className="mt-6 flex justify-end gap-2"><button type="button" className="btn-quiet" onClick={() => setDeletingTrade(null)} data-testid="button-cancel-delete">Keep entry</button><button type="button" className="inline-flex items-center gap-2 rounded-lg bg-destructive px-3 py-2 text-sm font-bold text-destructive-foreground" onClick={confirmDelete} disabled={deleteTrade.isPending} data-testid="button-confirm-delete"><TrendingDown size={15} />{deleteTrade.isPending ? 'Removing…' : 'Delete entry'}</button></div></div></div>}
     </div>

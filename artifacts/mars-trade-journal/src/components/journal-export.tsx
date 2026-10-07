@@ -6,23 +6,12 @@ import {
   buildJournalExport,
   csvBundle,
   downloadFile,
-  printableJournal,
 } from "@/lib/journal-export";
 
 export function JournalExportPanel() {
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
   async function exportJournal(format: "json" | "csv" | "pdf") {
-    // Open during the click so popup blockers do not discard the PDF report.
-    const report = format === "pdf" ? window.open("", "_blank") : null;
-    if (format === "pdf" && !report) {
-      setError("Allow popups to open the PDF report, then try again.");
-      return;
-    }
-    if (report) {
-      report.opener = null;
-      report.document.body.textContent = "Preparing your complete journal…";
-    }
     setBusy(format);
     setError("");
     try {
@@ -32,7 +21,13 @@ export function JournalExportPanel() {
         listJournalNotes(),
         getScreenshots(),
       ]);
-      const data = await buildJournalExport(trades, notes, screenshots);
+      const data = await buildJournalExport(
+        trades,
+        notes,
+        screenshots.filter((image) =>
+          trades.some((trade) => trade.id === image.tradeId),
+        ),
+      );
       const name = `mars-journal-${new Date().toISOString().slice(0, 10)}`;
       if (format === "json")
         downloadFile(
@@ -46,34 +41,15 @@ export function JournalExportPanel() {
           "application/zip",
           `${name}-csv.zip`,
         );
-      if (report) {
-        report.document.open();
-        report.document.write(printableJournal(data));
-        report.document.close();
-        const print = async () => {
-          await Promise.all(
-            Array.from(report.document.images).map((img) => img.decode()),
-          );
-          report.focus();
-          report.print();
-        };
-        report.document
-          .getElementById("save-pdf")
-          ?.addEventListener(
-            "click",
-            () =>
-              void print().catch(() =>
-                setError(
-                  "An image could not be prepared for PDF. Use JSON or CSV to preserve the original images.",
-                ),
-              ),
-          );
-        await Promise.all(
-          Array.from(report.document.images).map((img) => img.decode()),
+      if (format === "pdf") {
+        const { createJournalPdf } = await import("@/lib/journal-pdf");
+        downloadFile(
+          (await createJournalPdf(data)).slice().buffer,
+          "application/pdf",
+          `${name}.pdf`,
         );
       }
     } catch {
-      report?.close();
       setError(
         "Export could not finish. Check your connection and browser storage access, then retry. No partial export was downloaded.",
       );
@@ -111,17 +87,23 @@ export function JournalExportPanel() {
                 : format === "csv"
                   ? "CSV + images (.zip)"
                   : format === "pdf"
-                    ? "PDF report"
+                    ? "PDF backup"
                     : "JSON + images"}
             </button>
           ))}
         </div>
       </div>
-      <details className="mt-3 text-xs text-muted-foreground"><summary className="w-fit cursor-pointer hover:text-primary">What’s included in each format?</summary><p className="mt-2 max-w-3xl leading-relaxed">
-        PDF shows charts beside your notes. JSON embeds images; the CSV ZIP
-        keeps image files alongside the data. Earlier screenshots are available
-        only from the browser where you saved them.
-      </p></details>
+      <details className="mt-3 text-xs text-muted-foreground">
+        <summary className="w-fit cursor-pointer hover:text-primary">
+          What’s included in each format?
+        </summary>
+        <p className="mt-2 max-w-3xl leading-relaxed">
+          PDF includes readable pages and an embedded backup for restoration.
+          JSON embeds images; the CSV ZIP keeps image files alongside the data.
+          Earlier screenshots for your current trades are included only from the
+          browser where you saved them.
+        </p>
+      </details>
       {error && (
         <p role="alert" className="mt-3 text-sm text-destructive">
           {error}

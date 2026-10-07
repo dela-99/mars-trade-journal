@@ -146,3 +146,13 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; transition: none !important; }
 }
+
+/* Keep controls usable on narrow phones and respect installed-app safe areas. */
+@media (max-width: 639px) {
+  input.control-input, select.control-input, textarea.control-input { font-size: 16px; max-width: 100%; }
+  .btn-primary, .btn-quiet, .journal-tab { min-height: 44px; }
+}
+@media (display-mode: standalone) {
+  body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+  .mars-shell > main > header { top: env(safe-area-inset-top); }
+}

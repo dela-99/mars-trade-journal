@@ -38,3 +38,28 @@ export function readDataUrl(blob: Blob): Promise<string> {
     reader.readAsDataURL(blob);
   });
 }
+
+/** Notes retain their original calendar date; trade instants use an explicit display timezone. */
+export function journalDays(
+  trades: { id: number; entryAt: string }[],
+  notes: { id: number; date: string }[],
+  timeZone = "UTC",
+) {
+  const days = new Map<
+    string,
+    { date: string; tradeIds: number[]; noteIds: number[] }
+  >();
+  const day = (date: string) => {
+    if (!days.has(date)) days.set(date, { date, tradeIds: [], noteIds: [] });
+    return days.get(date)!;
+  };
+  for (const trade of [...trades].sort(
+    (a, b) => a.entryAt.localeCompare(b.entryAt) || a.id - b.id,
+  ))
+    day(journalDate(trade.entryAt, timeZone)).tradeIds.push(trade.id);
+  for (const note of [...notes].sort(
+    (a, b) => a.date.localeCompare(b.date) || a.id - b.id,
+  ))
+    day(note.date).noteIds.push(note.id);
+  return [...days.values()].sort((a, b) => a.date.localeCompare(b.date));
+}

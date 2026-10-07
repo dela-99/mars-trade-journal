@@ -14,3 +14,6 @@ export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 export const db = drizzle(pool, { schema });
 
 export * from "./schema";
+
+// Share operators with callers so pnpm peer variants cannot split Drizzle types.
+export { and, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";

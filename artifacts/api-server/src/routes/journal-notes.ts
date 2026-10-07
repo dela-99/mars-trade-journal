@@ -1,5 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray } from "@workspace/db";
 import { db, journalNotesTable, tradesTable } from "@workspace/db";
 import { CreateJournalNoteBody } from "@workspace/api-zod";
 import {
@@ -15,6 +15,7 @@ router.get("/journal-notes", async (_req, res) => {
     await db
       .select()
       .from(journalNotesTable)
+      .where(eq(journalNotesTable.userId, res.locals.userId))
       .orderBy(desc(journalNotesTable.date), desc(journalNotesTable.id)),
   );
 });
@@ -27,13 +28,12 @@ async function saveNote(req: Request, res: Response) {
   const parsed = CreateJournalNoteBody.safeParse(req.body);
   if (
     !parsed.success ||
-    (id !== undefined && (!Number.isSafeInteger(id) || id < 1 || id > 2147483647))
+    (id !== undefined &&
+      (!Number.isSafeInteger(id) || id < 1 || id > 2147483647))
   ) {
-    res
-      .status(400)
-      .json({
-        error: "Invalid note. Check field lengths and screenshot limits.",
-      });
+    res.status(400).json({
+      error: "Invalid note. Check field lengths and screenshot limits.",
+    });
     return;
   }
   const data = parsed.data;
@@ -46,7 +46,7 @@ async function saveNote(req: Request, res: Response) {
   if (
     !validCalendarDate(data.date) ||
     !data.title.trim() ||
-    data.selectedTradeIds.some(id => id > 2147483647) ||
+    data.selectedTradeIds.some((id) => id > 2147483647) ||
     data.attachments.some((a) => !validImageDataUrl(a.dataUrl)) ||
     new Set(data.attachments.map((a) => a.id)).size !==
       data.attachments.length ||
@@ -54,12 +54,10 @@ async function saveNote(req: Request, res: Response) {
     (data.linkMode === "selected" && !data.selectedTradeIds.length) ||
     (data.linkMode === "date" && data.selectedTradeIds.length > 0)
   ) {
-    res
-      .status(400)
-      .json({
-        error:
-          "Check the date, trade selection and screenshots (PNG, JPEG, WebP or GIF, up to 5 MB each).",
-      });
+    res.status(400).json({
+      error:
+        "Check the date, trade selection and screenshots (PNG, JPEG, WebP or GIF, up to 5 MB each).",
+    });
     return;
   }
   // Existing selections can survive a deleted or re-dated trade; new selections must match.
@@ -69,7 +67,12 @@ async function saveNote(req: Request, res: Response) {
       : await db
           .select()
           .from(journalNotesTable)
-          .where(eq(journalNotesTable.id, id));
+          .where(
+            and(
+              eq(journalNotesTable.id, id),
+              eq(journalNotesTable.userId, res.locals.userId),
+            ),
+          );
   if (id !== undefined && !existing) {
     res.status(404).json({ error: "Note not found" });
     return;
@@ -87,28 +90,41 @@ async function saveNote(req: Request, res: Response) {
     const trades = await db
       .select()
       .from(tradesTable)
-      .where(inArray(tradesTable.id, newIds));
+      .where(
+        and(
+          inArray(tradesTable.id, newIds),
+          eq(tradesTable.userId, res.locals.userId),
+        ),
+      );
     if (
       trades.length !== newIds.length ||
       trades.some((t) => calendarDate(t.entryAt, data.timeZone) !== data.date)
     ) {
-      res
-        .status(400)
-        .json({
-          error:
-            "Selected trades must exist and match the note date in its timezone. Refresh and try again.",
-        });
+      res.status(400).json({
+        error:
+          "Selected trades must exist and match the note date in its timezone. Refresh and try again.",
+      });
       return;
     }
   }
-  const values = { ...data, title: data.title.trim(), updatedAt: new Date() };
+  const values = {
+    ...data,
+    userId: res.locals.userId,
+    title: data.title.trim(),
+    updatedAt: new Date(),
+  };
   const [note] =
     id === undefined
       ? await db.insert(journalNotesTable).values(values).returning()
       : await db
           .update(journalNotesTable)
           .set(values)
-          .where(eq(journalNotesTable.id, id))
+          .where(
+            and(
+              eq(journalNotesTable.id, id),
+              eq(journalNotesTable.userId, res.locals.userId),
+            ),
+          )
           .returning();
   if (!note) {
     res.status(404).json({ error: "Note not found" });
@@ -125,7 +141,12 @@ router.delete("/journal-notes/:id", async (req, res) => {
   }
   const [note] = await db
     .delete(journalNotesTable)
-    .where(eq(journalNotesTable.id, id))
+    .where(
+      and(
+        eq(journalNotesTable.id, id),
+        eq(journalNotesTable.userId, res.locals.userId),
+      ),
+    )
     .returning({ id: journalNotesTable.id });
   if (!note) {
     res.status(404).json({ error: "Note not found" });

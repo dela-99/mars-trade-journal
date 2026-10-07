@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { and, desc, eq, ilike, or } from "drizzle-orm";
+import { and, desc, eq, ilike, or } from "@workspace/db";
 import { db, tradesTable } from "@workspace/db";
 import {
   CreateTradeBody,
@@ -24,7 +24,10 @@ function toApiTrade(trade: typeof tradesTable.$inferSelect) {
   };
 }
 
-function parseTradeBody(body: unknown, schema: typeof CreateTradeBody | typeof UpdateTradeBody) {
+function parseTradeBody(
+  body: unknown,
+  schema: typeof CreateTradeBody | typeof UpdateTradeBody,
+) {
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
     return { error: parsed.error.flatten() };
@@ -46,7 +49,9 @@ router.get("/trades", async (req, res) => {
   }
 
   const { search, side } = parsedQuery.data;
-  const filters = [];
+  const filters: Array<ReturnType<typeof and>> = [
+    eq(tradesTable.userId, res.locals.userId),
+  ];
 
   if (side) {
     filters.push(eq(tradesTable.side, side));
@@ -76,13 +81,16 @@ router.get("/trades", async (req, res) => {
 router.post("/trades", async (req, res) => {
   const parsed = parseTradeBody(req.body, CreateTradeBody);
   if ("error" in parsed) {
-    res.status(400).json({ error: "Invalid trade data", details: parsed.error });
+    res
+      .status(400)
+      .json({ error: "Invalid trade data", details: parsed.error });
     return;
   }
 
   const [trade] = await db
     .insert(tradesTable)
     .values({
+      userId: res.locals.userId,
       symbol: parsed.data.symbol.trim().toUpperCase(),
       asset: parsed.data.asset.trim(),
       side: parsed.data.side,
@@ -100,7 +108,10 @@ router.post("/trades", async (req, res) => {
 });
 
 router.get("/trades/summary", async (_req, res) => {
-  const trades = await db.select().from(tradesTable);
+  const trades = await db
+    .select()
+    .from(tradesTable)
+    .where(eq(tradesTable.userId, res.locals.userId));
   const summary = {
     totalTrades: trades.length,
     buys: trades.filter((trade) => trade.side === "buy").length,
@@ -126,6 +137,7 @@ router.patch("/trades/:id", async (req, res) => {
   const [trade] = await db
     .update(tradesTable)
     .set({
+      userId: res.locals.userId,
       symbol: parsed.data.symbol.trim().toUpperCase(),
       asset: parsed.data.asset.trim(),
       side: parsed.data.side,
@@ -137,7 +149,12 @@ router.patch("/trades/:id", async (req, res) => {
       notes: parsed.data.notes?.trim() || null,
       updatedAt: new Date(),
     })
-    .where(eq(tradesTable.id, parsedParams.data.id))
+    .where(
+      and(
+        eq(tradesTable.id, parsedParams.data.id),
+        eq(tradesTable.userId, res.locals.userId),
+      ),
+    )
     .returning();
 
   if (!trade) {
@@ -158,7 +175,12 @@ router.delete("/trades/:id", async (req, res) => {
 
   const [trade] = await db
     .delete(tradesTable)
-    .where(eq(tradesTable.id, parsedParams.data.id))
+    .where(
+      and(
+        eq(tradesTable.id, parsedParams.data.id),
+        eq(tradesTable.userId, res.locals.userId),
+      ),
+    )
     .returning({ id: tradesTable.id });
 
   if (!trade) {
