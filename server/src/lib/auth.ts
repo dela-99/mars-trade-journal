@@ -8,7 +8,7 @@ import {
   accountsTable,
   verificationsTable,
   rateLimitsTable,
-} from "@workspace/db";
+} from "../db/index";
 import type { RequestHandler } from "express";
 
 // No fallback secret: production and local installations must configure their own.

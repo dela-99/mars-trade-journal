@@ -6,8 +6,9 @@ import { spawnSync } from "node:child_process";
 const directory = await mkdtemp(join(tmpdir(), "mars-journal-tests-"));
 try {
   const files = [
-    "src/lib/note-validation.test.ts",
-    "src/lib/import-identity.test.ts",
+    "src/lib/external-import.test.ts",
+    "src/lib/journal.test.ts",
+    "src/lib/journal-import.test.ts",
   ];
   for (const [index, file] of files.entries()) {
     await build({

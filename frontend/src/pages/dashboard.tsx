@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Activity, BookOpen, Check, CircleAlert, Database, Pencil, Plus, RefreshCw, Search, Sparkles, Target, TrendingDown, TrendingUp, X } from 'lucide-react';
-import { useListJournalNotes, getListJournalNotesQueryKey, useDeleteTrade, useGetTradeSummary, useHealthCheck, useListTrades, getGetTradeSummaryQueryKey, getListTradesQueryKey } from '@workspace/api-client-react';
-import type { JournalNote, Trade } from '@workspace/api-client-react';
+import { useListJournalNotes, getListJournalNotesQueryKey, useDeleteTrade, useGetTradeSummary, useHealthCheck, useListTrades, getGetTradeSummaryQueryKey, getListTradesQueryKey } from '@/api-client';
+import type { JournalNote, Trade } from '@/api-client';
 import { useQueryClient } from '@tanstack/react-query';
 import { TradeForm } from '@/components/trade-form';
 import { TradeTable } from '@/components/trade-table';

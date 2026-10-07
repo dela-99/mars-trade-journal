@@ -1,13 +1,13 @@
 import { Router } from "express";
 import { createHash, randomUUID } from "node:crypto";
-import { and, eq, sql } from "@workspace/db";
+import { and, eq, sql } from "../db/index";
 import {
   db,
   tradesTable,
   journalNotesTable,
   importRecordsTable,
-} from "@workspace/db";
-import { CreateTradeBody, CreateJournalNoteBody } from "@workspace/api-zod";
+} from "../db/index";
+import { CreateTradeBody, CreateJournalNoteBody } from "../api-zod/index";
 import {
   calendarDate,
   validCalendarDate,

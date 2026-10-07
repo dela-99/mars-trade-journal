@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Check, FileImage, ImagePlus, LoaderCircle, Trash2, X } from "lucide-react";
-import type { Trade } from "@workspace/api-client-react";
+import type { Trade } from "@/api-client";
 import { useLocalScreenshots } from "@/hooks/use-local-screenshots";
 
 type ScreenshotPanelProps = {

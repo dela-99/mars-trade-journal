@@ -9,7 +9,7 @@ import {
   journalCsv,
   printableJournal,
 } from "./journal-export";
-import type { JournalNote, Trade } from "@workspace/api-client-react";
+import type { JournalNote, Trade } from "@/api-client";
 
 const trade = (id: number, entryAt = "2026-10-06T01:00:00Z"): Trade => ({
   id,

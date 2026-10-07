@@ -1,4 +1,4 @@
-import type { JournalNote, Trade } from "@workspace/api-client-react";
+import type { JournalNote, Trade } from "@/api-client";
 import { journalDays, noteLinks, readDataUrl } from "./journal";
 import type { LocalScreenshot } from "@/hooks/use-local-screenshots";
 

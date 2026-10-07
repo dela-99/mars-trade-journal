@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Check, CircleX, Save, X } from 'lucide-react';
-import { useCreateTrade, useUpdateTrade } from '@workspace/api-client-react';
-import type { Trade } from '@workspace/api-client-react';
+import { useCreateTrade, useUpdateTrade } from '@/api-client';
+import type { Trade } from '@/api-client';
 
 const SYMBOL_OPTIONS = ['XAUUSD', 'EURUSD', 'USDJPY'] as const;
 

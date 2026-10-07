@@ -1,17 +1,31 @@
-# Frontend — Vercel
+# Frontend
 
-This folder contains the React/Vite app (`src`, `public`), its browser API client (`api-client`), and the optional UI development tool (`mockup-sandbox`). The mockup tool is not deployed.
+Independent React/Vite project. Install and run commands **inside this folder**.
 
-Import this repository into Vercel with **Root Directory `./`** and **Framework Preset Vite**. The root `vercel.json` installs the pnpm workspace, runs `pnpm run build:frontend`, and publishes only `frontend/dist/public`. Keep the root directory at the repository root: this app uses the shared pnpm lockfile and TypeScript configuration.
+## Vercel settings
 
-Before deploying, replace `https://replace-with-your-render-service.onrender.com` in the root `vercel.json` with the backend URL from Render. Keep `/api/:path*` on the destination. Requests for `/api` are forwarded to Render. The journal currently has one page at `/`; no catch-all rewrite is needed. If new client routes are added, add targeted SPA fallbacks that preserve static assets and Vite development modules. Static assets and the PWA manifest/worker are served by Vercel.
+| Setting | Value |
+| --- | --- |
+| Root Directory | `frontend` |
+| Framework Preset | Vite |
+| Install Command | `pnpm install --frozen-lockfile --prod=false` |
+| Build Command | `pnpm run build` |
+| Output Directory | `dist/public` |
 
-The browser always calls `/api` on its own origin. Vercel forwards those requests to Render, which runs the entire backend. This preserves first-party login cookies; no cross-site cookie settings, `VITE_API_URL`, server bindings, or browser credentials are needed. Set Render's `BETTER_AUTH_URL` to the exact public **frontend** HTTPS origin (without `/api`). Never put database/auth secrets in the frontend or `VITE_*` variables.
+`frontend/vercel.json` contains these settings. Replace `https://replace-with-your-render-service.onrender.com` there with the real Render backend URL, keeping `/api/:path*` in the destination. Vercel serves the frontend and forwards `/api` to Render. The browser uses its own domain for API calls and login cookies. Render's `BETTER_AUTH_URL` must equal the frontend's final HTTPS origin, without `/api`.
 
-For local development, run the backend on port 3001, then from the repository root:
+Never put database credentials or auth secrets in frontend environment variables. No files outside `frontend/` are required to install or build the frontend. The pnpm YAML stores package-manager security policy; this is an independent project, not a shared workspace.
+
+## Local commands
 
 ```bash
-PORT=3000 pnpm --filter @workspace/mars-trade-journal run dev
+pnpm install --frozen-lockfile --prod=false
+pnpm run dev
+pnpm run typecheck
+pnpm test
+pnpm run build
 ```
 
-The local Vite proxy sends `/api` to `http://127.0.0.1:3001`. Set `API_PROXY_TARGET` on the Vite process to override that local target. This variable does not change production routing.
+Development uses port 3000 and proxies `/api` to the backend on port 3001. Set `API_PROXY_TARGET` on the Vite process if using another local API target. Production uses the external rewrite in `vercel.json`.
+
+The optional `mockup-sandbox/` is retained as a local design tool within this project. Run `pnpm run dev:mockup`; it is not a separate deployable service. The browser API client is ordinary source under `src/api-client/`.

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { and, desc, eq, ilike, or } from "@workspace/db";
-import { db, tradesTable } from "@workspace/db";
+import { and, desc, eq, ilike, or } from "../db/index";
+import { db, tradesTable } from "../db/index";
 import {
   CreateTradeBody,
   CreateTradeResponse,
@@ -11,7 +11,7 @@ import {
   UpdateTradeBody,
   UpdateTradeParams,
   UpdateTradeResponse,
-} from "@workspace/api-zod";
+} from "../api-zod/index";
 
 const router: IRouter = Router();
 

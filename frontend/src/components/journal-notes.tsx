@@ -7,7 +7,7 @@ import {
   type JournalNote,
   type JournalNoteInput,
   type Trade,
-} from "@workspace/api-client-react";
+} from "@/api-client";
 import {
   Dialog,
   DialogContent,

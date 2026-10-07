@@ -2,8 +2,8 @@ import { defineConfig, InputTransformerFn } from "orval";
 import path from "path";
 
 const root = path.resolve(__dirname, "..", "..");
-const apiClientReactSrc = path.resolve(root, "frontend", "api-client", "src");
-const apiZodSrc = path.resolve(root, "server", "api-zod", "src");
+const apiClientReactSrc = path.resolve(root, "frontend", "src", "api-client");
+const apiZodSrc = path.resolve(root, "server", "src", "api-zod");
 
 // Our exports make assumptions about the title of the API being "Api" (i.e. generated output is `api.ts`).
 const titleTransformer: InputTransformerFn = (config) => {
@@ -16,7 +16,7 @@ const titleTransformer: InputTransformerFn = (config) => {
 export default defineConfig({
   "api-client-react": {
     input: {
-      target: "./openapi.yaml",
+      target: path.resolve(__dirname, "openapi.yaml"),
       override: {
         transformer: titleTransformer,
       },
@@ -42,7 +42,7 @@ export default defineConfig({
   },
   zod: {
     input: {
-      target: "./openapi.yaml",
+      target: path.resolve(__dirname, "openapi.yaml"),
       override: {
         transformer: titleTransformer,
       },
@@ -57,9 +57,8 @@ export default defineConfig({
       prettier: true,
       override: {
         zod: {
-          // Orval resolves `auto` from server/api-spec/package.json, which has no
-          // zod dependency, so orval >= 8.23 falls back to Zod 4 syntax while
-          // the catalog installs zod 3. Pin to match the catalog.
+          // Keep generated validators compatible with the server
+          // dependency on Zod 3, regardless of Orval auto-detection.
           version: 3,
           coerce: {
             query: ['boolean', 'number', 'string'],

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Download } from "lucide-react";
-import { listTrades, listJournalNotes } from "@workspace/api-client-react";
+import { listTrades, listJournalNotes } from "@/api-client";
 import { getScreenshots } from "@/hooks/use-local-screenshots";
 import {
   buildJournalExport,

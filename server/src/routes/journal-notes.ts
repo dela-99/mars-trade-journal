@@ -1,7 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { and, desc, eq, inArray } from "@workspace/db";
-import { db, journalNotesTable, tradesTable } from "@workspace/db";
-import { CreateJournalNoteBody } from "@workspace/api-zod";
+import { and, desc, eq, inArray } from "../db/index";
+import { db, journalNotesTable, tradesTable } from "../db/index";
+import { CreateJournalNoteBody } from "../api-zod/index";
 import {
   calendarDate,
   validCalendarDate,

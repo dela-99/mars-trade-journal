@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { createRequire } from "node:module";
 const require = createRequire(
-  new URL("../server/db/package.json", import.meta.url),
+  new URL("../package.json", import.meta.url),
 );
 const { Pool } = require("pg");
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -97,7 +97,7 @@ try {
   const [a, b] = users;
   const originalChecks = spawnSync(
     process.execPath,
-    ["scripts/verify-journal-api.mjs"],
+    [new URL("./verify-journal-api.mjs", import.meta.url).pathname],
     {
       env: {
         ...process.env,

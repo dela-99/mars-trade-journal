@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { CalendarDays, FileText, ArrowUpRight } from "lucide-react";
-import type { Trade, JournalNote } from "@workspace/api-client-react";
+import type { Trade, JournalNote } from "@/api-client";
 import { journalDays, noteLinks } from "@/lib/journal";
 export function JournalDays({
   trades,

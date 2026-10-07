@@ -1,4 +1,4 @@
-import type { JournalNoteInput, Trade } from "@workspace/api-client-react";
+import type { JournalNoteInput, Trade } from "@/api-client";
 
 export function journalDate(value: string, timeZone: string) {
   return new Intl.DateTimeFormat("en-CA", {

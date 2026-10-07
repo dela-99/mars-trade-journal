@@ -1,5 +1,5 @@
 import { ArrowDownLeft, ArrowUpRight, Edit3, FileImage, FileText, Trash2 } from 'lucide-react';
-import type { Trade } from '@workspace/api-client-react';
+import type { Trade } from '@/api-client';
 
 type TradeTableProps = {
   trades: Trade[];

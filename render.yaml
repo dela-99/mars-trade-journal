@@ -1,10 +1,10 @@
-# Render hosts only the API. Keep the repository root so pnpm can see the workspace.
 services:
   - type: web
-    name: mars-journal-server
+    name: server
     runtime: node
-    buildCommand: pnpm install --frozen-lockfile --prod=false && pnpm run build:server
-    startCommand: pnpm run start:server
+    rootDir: server
+    buildCommand: pnpm install --frozen-lockfile --prod=false && pnpm run build
+    startCommand: pnpm run start
     healthCheckPath: /api/healthz
     envVars:
       - key: NODE_VERSION

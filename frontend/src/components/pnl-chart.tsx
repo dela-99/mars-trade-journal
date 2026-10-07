@@ -1,5 +1,5 @@
 import { Area, AreaChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import type { Trade } from "@workspace/api-client-react";
+import type { Trade } from "@/api-client";
 
 type PnlChartProps = {
   trades: Trade[];
