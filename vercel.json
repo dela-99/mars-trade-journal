@@ -1,37 +1,14 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "services": {
-    "api-server": {
-      "root": "artifacts/api-server",
-      "framework": "express",
-      "entrypoint": "src/app.ts",
-      "buildCommand": "pnpm run build"
-    },
-    "mars-trade-journal": {
-      "root": "artifacts/mars-trade-journal",
-      "framework": "vite",
-      "buildCommand": "pnpm run build",
-      "outputDirectory": "dist/public"
-    },
-    "mockup-sandbox": {
-      "root": "artifacts/mockup-sandbox",
-      "framework": "vite",
-      "buildCommand": "pnpm run build",
-      "outputDirectory": "dist"
-    }
-  },
+  "framework": "vite",
+  "installCommand": "pnpm install --frozen-lockfile --prod=false",
+  "buildCommand": "pnpm run build:frontend",
+  "outputDirectory": "frontend/dist/public",
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": {
-        "service": "api-server"
-      }
-    },
-    {
-      "source": "/(.*)",
-      "destination": {
-        "service": "mars-trade-journal"
-      }
+      "destination": "https://replace-with-your-render-service.onrender.com/api/:path*"
     }
-  ]
+  ],
+  "devCommand": "pnpm --filter @workspace/mars-trade-journal run dev --port $PORT"
 }

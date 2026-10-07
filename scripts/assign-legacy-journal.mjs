@@ -1,7 +1,7 @@
 // One-time operator action. Run with DATABASE_URL set, after creating the intended account.
 import { createRequire } from "node:module";
 const require = createRequire(
-  new URL("../lib/db/package.json", import.meta.url),
+  new URL("../server/db/package.json", import.meta.url),
 );
 const { Pool } = require("pg");
 const email = process.argv[2]?.trim().toLowerCase();

@@ -8,9 +8,9 @@ try {
   const files = [
     "src/lib/note-validation.test.ts",
     "src/lib/import-identity.test.ts",
-    "../mars-trade-journal/src/lib/external-import.test.ts",
-    "../mars-trade-journal/src/lib/journal.test.ts",
-    "../mars-trade-journal/src/lib/journal-import.test.ts",
+    "../frontend/src/lib/external-import.test.ts",
+    "../frontend/src/lib/journal.test.ts",
+    "../frontend/src/lib/journal-import.test.ts",
   ];
   for (const [index, file] of files.entries()) {
     await build({

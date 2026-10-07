@@ -38,7 +38,6 @@ export default defineConfig({
       '@assets': path.resolve(
         import.meta.dirname,
         '..',
-        '..',
         'attached_assets',
       ),
     },
@@ -52,10 +51,9 @@ export default defineConfig({
   server: {
     port,
     strictPort: true,
-    // Only standalone Vite uses a local proxy. Vercel routes /api at the
-    // project level; its runtime bindings must never be baked into Vite.
-    proxy: process.env.VERCEL ? undefined : {
-      '/api': { target: process.env.API_PROXY_TARGET ?? 'http://127.0.0.1:3001', changeOrigin: true },
+    // Local equivalent of Vercel's external /api rewrite to Render.
+    proxy: {
+      '^/api(?:/|$)': { target: process.env.API_PROXY_TARGET ?? 'http://127.0.0.1:3001', changeOrigin: true },
     },
     host: '0.0.0.0',
     allowedHosts: true,

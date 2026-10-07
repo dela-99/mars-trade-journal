@@ -3,7 +3,7 @@ previewPath = "/"
 title = "M.A.R.S. Trade Journal"
 description = "A focused trading journal for recording, reviewing, and analyzing manual trades with clear P&L states, strategy context, and market regime notes."
 version = "1.0.0"
-id = "artifacts/mars-trade-journal"
+id = "frontend"
 router = "path"
 
 [[services]]
@@ -17,7 +17,7 @@ run = "pnpm --filter @workspace/mars-trade-journal run dev"
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/mars-trade-journal", "run", "build" ]
 serve = "static"
-publicDir = "artifacts/mars-trade-journal/dist/public"
+publicDir = "frontend/dist/public"
 
 [[services.production.rewrites]]
 from = "/*"

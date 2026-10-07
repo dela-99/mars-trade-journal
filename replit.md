@@ -4,34 +4,35 @@ A responsive manual trade journal for recording, reviewing, and learning from tr
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `PORT=3001 pnpm --filter @workspace/api-server run dev` — run the API server
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Required server env: `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (public frontend origin)
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
 - API: Express 5
 - DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
+- Validation: Zod 3, `drizzle-zod`
 - API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Build: esbuild (ESM backend bundle), Vite (frontend)
 
 ## Where things live
 
-- `artifacts/mars-trade-journal/` — React/Vite dashboard and trade-entry UI
-- `artifacts/api-server/src/routes/trades.ts` — journal CRUD and summary endpoints
-- `lib/api-spec/openapi.yaml` — source-of-truth API contract
-- `lib/db/src/schema/trades.ts` — source-of-truth PostgreSQL trade schema
-- `artifacts/mars-trade-journal/src/index.css` — dashboard theme and visual tokens
+- `frontend/` — React/Vite dashboard and trade-entry UI
+- `server/src/routes/trades.ts` — journal CRUD and summary endpoints
+- `server/api-spec/openapi.yaml` — source-of-truth API contract
+- `server/db/src/schema/trades.ts` — source-of-truth PostgreSQL trade schema
+- `frontend/src/index.css` — dashboard theme and visual tokens
 
 ## Architecture decisions
 
 - Trade records are persisted in PostgreSQL so entries survive reloads and are ready for future automated ingestion.
-- Screenshot evidence is intentionally stored as browser-local IndexedDB Blobs for this single-user version; it does not require sign-in or cloud upload.
+- Accounts, journal notes and screenshot evidence are stored in PostgreSQL. Legacy browser-local screenshots remain exportable; account ownership protects server records.
+- Deployment: Vercel serves the frontend and proxies `/api` to the Render backend. See the root README and per-folder deployment guides.
 - The API is contract-first through OpenAPI, with generated Zod validation and React Query hooks.
 - The product intentionally exposes journal CRUD only; it has no broker connection or trade execution capability.
 - The first version calculates lightweight review summaries from recorded entries and leaves deeper analytics for later.
