@@ -3,11 +3,6 @@ minimumReleaseAgeExclude:
   - "@replit/*"
   - stripe-replit-sync
 autoInstallPeers: false
-onlyBuiltDependencies:
-  - "@swc/core"
-  - esbuild
-  - msw
-  - unrs-resolver
 overrides:
   esbuild>@esbuild/darwin-arm64: "-"
   esbuild>@esbuild/darwin-x64: "-"
