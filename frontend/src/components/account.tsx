@@ -8,7 +8,15 @@ import {
   type FormEvent,
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Cloud, LogOut, RefreshCw, ShieldCheck, Target } from "lucide-react";
+import {
+  Cloud,
+  Eye,
+  EyeOff,
+  LogOut,
+  RefreshCw,
+  ShieldCheck,
+  Target,
+} from "lucide-react";
 
 type User = { id: string; name: string; email: string };
 const AccountContext = createContext<{
@@ -37,6 +45,7 @@ export function AccountGate({ children }: { children: ReactNode }) {
   const [error, setError] = useState("");
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [retry, setRetry] = useState(0);
   useEffect(() => {
     let active = true;
@@ -171,17 +180,28 @@ export function AccountGate({ children }: { children: ReactNode }) {
           </label>
           <label className="block text-sm font-medium">
             Password
-            <input
-              name="password"
-              type="password"
-              className="control-input mt-1 w-full"
-              autoComplete={
-                mode === "signup" ? "new-password" : "current-password"
-              }
-              required
-              minLength={mode === "signup" ? 12 : 1}
-              maxLength={128}
-            />
+            <span className="relative mt-1 block">
+              <input
+                name="password"
+                type={showPassword ? "text" : "password"}
+                className="control-input w-full pr-11"
+                autoComplete={
+                  mode === "signup" ? "new-password" : "current-password"
+                }
+                required
+                minLength={mode === "signup" ? 12 : 1}
+                maxLength={128}
+              />
+              <button
+                type="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                title={showPassword ? "Hide password" : "Show password"}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                onClick={() => setShowPassword((visible) => !visible)}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </span>
           </label>
           {mode === "signup" && (
             <p className="text-xs text-muted-foreground">
