@@ -7,7 +7,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://mars-trade-journal-api.onrender.com/api/:path*"
+      "destination": "https://mars-trade-journal.onrender.com/api/:path*"
     }
   ],
   "devCommand": "pnpm run dev --port $PORT"

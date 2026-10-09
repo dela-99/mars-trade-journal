@@ -23,6 +23,7 @@ if (!process.env.BETTER_AUTH_URL)
   throw new Error("Set BETTER_AUTH_URL to the public application origin.");
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
+  trustedOrigins: [process.env.BETTER_AUTH_URL],
   secret: process.env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: "pg",
